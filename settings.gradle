@@ -1,0 +1,2 @@
+rootProject.name='Dabba Tracker v2'
+include ':app'

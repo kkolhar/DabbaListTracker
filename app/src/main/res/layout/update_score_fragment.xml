@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp">
+
+        <TextView
+            android:id="@+id/thisRoundTextView"
+            style="@style/mainRelLayout"
+            android:layout_marginBottom="12dp"
+            android:padding="8dp"
+            android:text="@string/thisRoundTextView_hint"
+            android:textColor="@color/labelTextColor"
+            android:textSize="@dimen/labelSize" />
+
+        <androidx.core.widget.NestedScrollView
+            style="@style/mainRelLayout"
+            android:layout_below="@id/thisRoundTextView">
+
+            <TableLayout
+                android:id="@+id/scoreTables"
+                style="@style/innerRelLayout"
+                android:layout_marginBottom="6dp"
+                android:stretchColumns="*" />
+        </androidx.core.widget.NestedScrollView>
+    </RelativeLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/doneFABButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:backgroundTint="@color/colorButton"
+        android:gravity="center"
+        android:src="@drawable/done_black"
+        android:text="@string/done"
+        android:theme="@style/Theme.MaterialComponents.NoActionBar"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/cancelFABButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        android:backgroundTint="@color/colorButton"
+        android:gravity="center"
+        android:src="@drawable/done_black"
+        android:text="@string/cancel_creategame"
+        android:theme="@style/Theme.MaterialComponents.NoActionBar"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
