@@ -1,4 +1,4 @@
-package com.kolhar.dabbatrackerv2;
+package com.kolhar.dabbalisttracker;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,6 +19,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -30,52 +31,39 @@ import java.util.List;
 
 public class UpdateScoreFragment extends Fragment {
     public static final String TAG = "UpdateScoreDabbaTAG";
-    private String[] globalplNames;
-    private int[] globalplScores, individualRoundScores;
-    private Bundle fromLDFBundle, toLDFBundle;
+    //private String[] globalplNames;
+    private int[] individualRoundScores;
+    private Bundle toLDFBundle;
     private TableLayout tempTable;
     private ExtendedFloatingActionButton doneButton, cancelButton;
-    private int globalCount, counter, USFMaxScore;
+    private int USFMaxScore;
     private TextView tempNameView, tempScoreView, firstUpdateView;
     private ImageView USFkavtiView;
     private EditText tempNewScoreEdit;
     private static Animation shakeAnimation;
-    List<EditText> allEds = new ArrayList<EditText>();
-    private int[] USFReentries;
+    private List<EditText> allEds = new ArrayList<EditText>();
+    private int USFLiveCount;
     private int roundcount;
     private int dealerno;
+    private Dabba USFDabba;
+    private ArrayList<Player> usf_ALplayers;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        fromLDFBundle = this.getArguments();
-        //Log.e(TAG, "------------------------------onCreate called, fromLDFBundle is: " + fromLDFBundle);
-        toLDFBundle = fromLDFBundle;        // get the fromLDFBundle to a local bundle: toLDFBundle
-        globalCount = fromLDFBundle.getInt("PLAYERS_COUNT");
-        Log.d(TAG, "GlobalCount in USF is: " + globalCount);
+        // get all the variables from LDF as a Bundle. This bundle continues to exist during the entire activity
+        USFDabba = this.getArguments().getParcelable("GAME_DABBA");
+        usf_ALplayers = USFDabba.getPlayers();
+        USFLiveCount = usf_ALplayers.size();            // Get the count of players
+        Log.d(TAG, "globalLiveCount: " + USFLiveCount);
 
-        globalplNames = new String[globalCount];
-        globalplNames = fromLDFBundle.getStringArray("players");
-        //   Log.d(TAG, "globalplNames array created of length: " + globalplNames.length);
+        // get the roundcount & max score from the Dabba object
+        USFMaxScore = USFDabba.getMaxScore();
+        roundcount = USFDabba.getRoundNo();
 
-        globalplScores = new int[globalCount];
-        globalplScores = fromLDFBundle.getIntArray("live_score");
-        //   Log.d(TAG, "globalplScores array created of length: " + globalplScores.length);
-
-        USFMaxScore = fromLDFBundle.getInt("max_score");
-
-        individualRoundScores = new int[globalCount];
-        //  Log.d(TAG, "individualRoundScores array created of length: " + individualRoundScores.length);
-
-        // Get all the players re-entries scenario
-        USFReentries = new int[globalCount];
-        USFReentries = fromLDFBundle.getIntArray("re-entry");
-
-        // get the round_count from NDF
-        roundcount = fromLDFBundle.getInt("roundno");
-
+        individualRoundScores = new int[USFLiveCount];
         // Load ShakeAnimation
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
 
@@ -93,8 +81,8 @@ public class UpdateScoreFragment extends Fragment {
         tempTable = (TableLayout) v.findViewById(R.id.scoreTables);
 
         // Create the tempTable in the below for loop
-        for (counter = 0; counter <= globalCount; counter++) {
-            //Log.d(TAG, "Value of counter is: " + counter);
+        for (int i = 0; i <= USFLiveCount; i++) {
+            //Log.d(TAG, "Value of i is: " + i);
 
             TableRow row = new TableRow(getContext());
 
@@ -127,7 +115,7 @@ public class UpdateScoreFragment extends Fragment {
             USFkavtiView.setImageResource(R.drawable.kavti);
             USFkavtiView.setLayoutParams(newScorecellParams);
             // Below if loop to create the first row of headers: 'Player', 'Existing' and 'This Round'
-            if (counter == 0) {
+            if (i == 0) {
                 //Log.w(TAG, "Entered if statement to create first row");
                 tempNameView.setText("Player");
                 tempScoreView.setText("Existing");
@@ -140,19 +128,18 @@ public class UpdateScoreFragment extends Fragment {
                 row.addView(tempNameView);
                 row.addView(tempScoreView);
                 row.addView(firstUpdateView);
-                tempTable.addView(row, counter);
+                tempTable.addView(row, i);
             }
             // Continue looping through the various bundle arrays and show them in the table
             else {
+                int score = usf_ALplayers.get(i - 1).getLiveScore();
                 // Log.w(TAG, "Entered else statement to create further rows");
-                tempNameView.setText(globalplNames[counter - 1]);
-                tempScoreView.setText(String.valueOf(globalplScores[counter - 1]));
+                tempNameView.setText(usf_ALplayers.get(i - 1).getpName());
+                tempScoreView.setText(String.valueOf(score));
 
                 // In case the player has already lost, show kavti
-                if (globalplScores[counter - 1] >= USFMaxScore) {
+                if (score >= USFMaxScore) {
                     tempScoreView.setTextColor(Color.RED);
-                    //tempNewScoreEdit.setEnabled(false);       -- this code is replaced by the kavtiView below
-                    //tempNewScoreEdit.setHint("Lost");
 
                     row.addView(tempNameView);
                     row.addView(tempScoreView);
@@ -166,7 +153,7 @@ public class UpdateScoreFragment extends Fragment {
                     row.addView(tempNewScoreEdit);
                 }
                 row.setGravity(android.view.Gravity.CENTER);
-                tempTable.addView(row, counter);
+                tempTable.addView(row, i);
             }
         }
 
@@ -178,8 +165,7 @@ public class UpdateScoreFragment extends Fragment {
                 // validate the no. of entries before goinog to LDF screen
                 if (updateScores())     // Before going to the main ScoreTable, update the scores for each player by adding this round's scores
                 {
-                    toLDFBundle.putIntArray("live_score", globalplScores);   // put the updates scores in the same common bundle
-                    toLDFBundle.putInt("roundno", roundcount);
+                    USFDabba.setRoundNo(roundcount);
                     startLDFFragment();
                 }
             }
@@ -195,18 +181,17 @@ public class UpdateScoreFragment extends Fragment {
         return v;
     }
 
-    // Update the scores by adding this round's scores to the existing scores
+    // Update the scores by adding this round's scores to the existing scores - Updated
     public Boolean updateScores() {
         // Check if all the entries are done. If yes, add the scores to the existing scores, else show AlertDialog
         if (validateEntries()) {
-            for (int j = 0; j < globalCount; j++) {
+            for (int j = 0; j < USFLiveCount; j++) {
                 //Log.e(TAG, "allEds.get(" + (j) + "): " + allEds.get(j).getText().toString());
                 if (allEds.get(j + 1).getText().toString().equals("")) {
-                    globalplScores[j] = globalplScores[j] + 0;
+                    usf_ALplayers.get(j).setLiveScore(usf_ALplayers.get(j).getLiveScore() + 0);
                 } else {
                     individualRoundScores[j] = Integer.parseInt(allEds.get(j + 1).getText().toString());
-                    globalplScores[j] = globalplScores[j] + individualRoundScores[j];
-                    //Log.i(TAG, "globalplScores[" + j + "]: " + globalplScores[j]);
+                    usf_ALplayers.get(j).setLiveScore(usf_ALplayers.get(j).getLiveScore() + individualRoundScores[j]);
                 }
             }
             roundcount++;
@@ -227,43 +212,46 @@ public class UpdateScoreFragment extends Fragment {
         }
     }
 
-    // to choose the next dealer
+    // to choose the next dealer - Updated
     public void chooseDealer() {
         // set the dealer no. as the next player
-        dealerno = (roundcount + 1) % globalCount;
+        dealerno = (roundcount + 1) % USFLiveCount;
 
         // in case the next player is already out, then move to the next player
-        while (globalplScores[dealerno] > USFMaxScore) {
-            dealerno = (dealerno + 1) % globalCount;
+        while (usf_ALplayers.get(dealerno).getLiveScore() > USFMaxScore) {
+            dealerno = (dealerno + 1) % USFLiveCount;
         }
 
-        Log.d(TAG, "Next game's dealer is:" + globalplNames[dealerno]);
+        Log.d(TAG, "Next game's dealer is:" + usf_ALplayers.get(dealerno).getpName());
     }
 
-    // to validate if all entries are done
+    // to validate if all entries are done - Updated
     private Boolean validateEntries() {
         // Initiate the no. of live players
         int emptyScores = 0, livePlayers = 0;
 
-        for (int j = 0; j < globalCount; j++) {
-            if (globalplScores[j] < USFMaxScore)
+        for (int j = 0; j < USFLiveCount; j++) {
+            if (usf_ALplayers.get(j).getLiveScore() < USFMaxScore)
                 livePlayers++;
         }
 
         Log.d(TAG, "Value of livePlayers is: " + livePlayers);
 
-        for (int j = 0; j < globalCount; j++) {
+        for (int j = 0; j < USFLiveCount; j++) {
             if (allEds.get(j + 1).getText().toString().equals("") || Integer.parseInt(allEds.get(j + 1).getText().toString()) == 0)
                 emptyScores++;
         }
 
-        if (emptyScores == ((globalCount - livePlayers) + 1))
+        if (emptyScores == ((USFLiveCount - livePlayers) + 1))
             return true;
         else return false;
     }
 
-    private void startLDFFragment(){
+    // Start the LDF Fragment after all scores are entered and validated - Updated
+    private void startLDFFragment() {
+        toLDFBundle = new Bundle();
         Fragment ldFragment = new LiveDabbaFragment();
+        toLDFBundle.putParcelable("GAME_DABBA", USFDabba);
         ldFragment.setArguments(toLDFBundle);
         getActivity().getSupportFragmentManager()
                 .beginTransaction()

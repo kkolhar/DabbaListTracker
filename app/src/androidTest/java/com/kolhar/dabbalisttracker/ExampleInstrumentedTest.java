@@ -1,4 +1,4 @@
-package com.kolhar.dabbatrackerv2;
+package com.kolhar.dabbalisttracker;
 
 import android.content.Context;
 

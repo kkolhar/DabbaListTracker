@@ -1,4 +1,4 @@
-package com.kolhar.dabbatrackerv2;
+package com.kolhar.dabbalisttracker;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -21,17 +22,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.DateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // This class is to set up the game with the max score, game bet amount and the no. of players. No. of players is restricted to 20 for now.
@@ -42,32 +50,31 @@ public class NewDabbaFragment extends Fragment {
     private EditText scoreText, betamtText;
     private Button addMeButton, addPlayersButton;
     private ExtendedFloatingActionButton startGameButton, resetPlayersButton;
-    private LinearLayout playersView;
     private TextView mDateView;
     private static final String TAG = "NewDabbaTAG";
     public static final String NDF_GAME_DATE = "date", NDF_MAX_SCORE = "max_score", NDF_BET_AMT = "bet_amts", NDF_LIVE_SCORE = "live_score", NDF_REENTRY = "re-entry";
     public static final String NDF_PLAYERS_LIST = "players", NDF_COUNT = "PLAYERS_COUNT", NDF_ROUND = "roundno", NDF_DEALERNO = "dealerno";
+    public static final String NDF_DABBA = "GAME_DABBA";
     private Dabba mDabba;
     private AlertDialog checkDialog;
-    public static int count;
-    private TextView plname_Temp;
-    private String player_temp, date;
-    private String[] playerNames;
-    private int[] playerScores, betAmounts;
-    private int[] reentry;
-    private int roundno = 0, dealerno = 1;
+    private String date;
+    private ArrayList<Player> mPlayers;
+    private NDFAdapter adapter;
+    private RecyclerView recyclerView;
 
     @Override
     public void onCreate(Bundle onSavedInstance) {
         super.onCreate(onSavedInstance);
         setRetainInstance(true);
         mDabba = new Dabba();       // creating a Dabba object to save certain parameters
-        mDabba.setmDate(new Date());
-        count = 0;
-        Log.d(TAG, "onCreate() of NDF called, connected to Activity: " + getActivity());
-        playerNames = new String[20];
+
+        //Log.d(TAG, "onCreate() of NDF called, connected to Activity: " + getActivity());
         checkDialog = new AlertDialog.Builder(getActivity()).create();
         checkDialog.setTitle("Hygiene Checks");
+
+        // Creating the ArrayList of players to be included in the list
+        mPlayers = new ArrayList<Player>();
+        adapter = new NDFAdapter(getActivity(), mPlayers);
     }
 
     // Create the first view consisting of date, maxScore - EditText, betAmt per player - EditText and players' list
@@ -112,24 +119,30 @@ public class NewDabbaFragment extends Fragment {
             }
         });
 
-        playersView = v.findViewById(R.id.players_List);
+        // Set up the recyclerView, mandatorily need the LayoutManager and adapter for the view, set the decoration as required
+        recyclerView = v.findViewById(R.id.playersRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        recyclerView.setAdapter(adapter);
+        // ItemTouchHelper is required to do any actions. In this case, we are doing swipe and hold-&-press reordering in the view itself
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         // addMeButton is included as players are being added from the contact list. The current phone may not have details about the owner's name stored in the contactlist
         addMeButton = (Button) v.findViewById(R.id.add_meButton);
         addMeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                plname_Temp = new TextView(getContext());
-                player_temp = "Me";
-                plname_Temp.setText(player_temp);
-                plname_Temp.setPadding(8, 4, 2, 4);
-                //Log.e(TAG, "Adding Me to the Players List");
-                playersView.addView(plname_Temp);
-                playerNames[count] = player_temp;
-                count++;
+                Player player = new Player();
+                player.setpName("Me");
+                mPlayers.add(player);
+                adapter.notifyDataSetChanged();
+                Log.w(TAG, "RecyclerView has adapter: " + recyclerView.hasPendingAdapterUpdates());
+                Log.e(TAG, "Adapter updated with: " + player.getpName());
+
                 // Log.d(TAG, "Player count is: " + count);
                 addMeButton.setEnabled(false);
-                //addMeButton.setBackgroundColor(Color.parseColor("#E0F7FA"));
             }
         });
 
@@ -138,7 +151,7 @@ public class NewDabbaFragment extends Fragment {
         addPlayersButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
-                // Checking if reading contacts is permitted
+                // Check if reading contacts is permitted
                 int permissionCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS);
                 if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Contacts Permission is not granted. Requesting user for the Contacts permission...");
@@ -179,38 +192,29 @@ public class NewDabbaFragment extends Fragment {
                     checkDialog.setButton(Dialog.BUTTON_POSITIVE, "OK", checkButtonListener);
                     checkDialog.show();
                 } else {
-                    //Log.d(TAG, "Creating a new game...");
-                    // Log.d(TAG, "NDF Current activity is: " + getActivity());
                     //Log.d(TAG, "List of players being transferred: " + playerNames);
-                    playerScores = new int[count];
-                    reentry = new int[count];
-                    betAmounts = new int[count];
-                    // Initialize a fresh array of playerScores, reEntry data and betAmounts. Only betAmounts are set as per the betamtText
-                    for (int i = 0; i < count; i++) {
-                        playerScores[i] = 0;
-                        reentry[i] = 0;
-                        betAmounts[i] = Integer.parseInt(betamtText.getText().toString());
+
+                    // Set all the bet amounts to the per amount value
+                    for (int i = 0; i < mPlayers.size(); i++) {
+                        mPlayers.get(i).setBetAmount(mDabba.getBetamt());
                     }
-
-
+                    mDabba.setPlayers(mPlayers);
+                    // mDabba.setBetamt(Integer.parseInt(betamtText.toString()));
+                    mDabba.setWinner("");
+                    // mDabba.setMaxScore(Integer.parseInt(scoreText.toString()));
                     // Create the bundle which will be circulated in the game. Add the score, playersCount, eachplayerBetAmount, 0-playerScores array, 0-reEntry array, game date and the Names array
                     Bundle toLiveDabbabundle = new Bundle();
-                    toLiveDabbabundle.putInt(NDF_MAX_SCORE, Integer.parseInt(scoreText.getText().toString()));
-                    toLiveDabbabundle.putInt(NDF_COUNT, count);
-                    toLiveDabbabundle.putInt(NDF_ROUND, roundno);
-                    toLiveDabbabundle.putInt(NDF_DEALERNO, dealerno);
-                    toLiveDabbabundle.putIntArray(NDF_BET_AMT, betAmounts);
-                    toLiveDabbabundle.putIntArray(NDF_LIVE_SCORE, playerScores);
-                    toLiveDabbabundle.putIntArray(NDF_REENTRY, reentry);
-                    toLiveDabbabundle.putString(NDF_GAME_DATE, date);
-                    toLiveDabbabundle.putStringArray(NDF_PLAYERS_LIST, playerNames);
-
+                    toLiveDabbabundle.putParcelable("GAME_DABBA", mDabba);
+                    // In case, all the fragments are running on the same Activity, the below code can be used
                     Fragment liveDabbaFragment = new LiveDabbaFragment();
                     liveDabbaFragment.setArguments(toLiveDabbabundle);
                     getActivity().getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.fragmentContainer, liveDabbaFragment)
                             .commit();
+                    /*Intent i = new Intent(getActivity(), LiveDabbaActivity.class);
+                    i.putExtra("GAME_DABBA", mDabba);
+                    startActivity(i);*/
                 }
             }
         });
@@ -220,9 +224,9 @@ public class NewDabbaFragment extends Fragment {
         resetPlayersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playersView.removeAllViewsInLayout();
+                mPlayers.clear();
+                adapter.notifyDataSetChanged();
                 addMeButton.setEnabled(true);
-                count = 0;
             }
         });
 
@@ -238,7 +242,7 @@ public class NewDabbaFragment extends Fragment {
         if (betamtText.getText().toString().isEmpty()) {
             return 2;
         }
-        if (count == 0 || count == 1) {
+        if (mPlayers.size() == 0 || mPlayers.size() == 1) {
             return 3;
         }
         return 0;
@@ -266,16 +270,12 @@ public class NewDabbaFragment extends Fragment {
             String player_temp = c.getString(0);
             //Log.e(TAG, "Received temp player: " + player_temp);
 
-            // Add a new TextView to the LinearView with the name of the player for the game
-            plname_Temp = new TextView(getContext());
-            plname_Temp.setText(player_temp);
-            //Log.e(TAG, "Adding player to the LinearView");
-            plname_Temp.setPadding(8, 4, 2, 4);
-            playersView.addView(plname_Temp);
-            playerNames[count] = player_temp;
-            count++;
             //Log.w(TAG, "Player count is: " + count);
-
+            Player player = new Player();
+            player.setpName(player_temp);
+            mPlayers.add(player);
+            adapter.notifyDataSetChanged();
+            Log.e(TAG, "Adapter updated with: " + player.getpName());
             c.close();
         }
     }
@@ -288,4 +288,77 @@ public class NewDabbaFragment extends Fragment {
         }
     };
 
+    ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+        //override getMovementFlags() to specify which directions of drags and swipes are supported
+        // Below 3 methods needed to enable swipe movement and Sort (up & down) movement
+        @Override
+        public int getMovementFlags(RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder) {
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+            int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+            return makeMovementFlags(dragFlags, swipeFlags);
+        }
+
+        // Implementations should return true from isLongPressDragEnabled() in order to support starting drag events from a long press on a RecyclerView item.
+        @Override
+        public boolean isLongPressDragEnabled() {
+            return true;
+        }
+
+        @Override
+        public boolean isItemViewSwipeEnabled() {
+            return true;
+        }
+
+        // Below function to define what is to be done, Undo option available
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+            Log.d(TAG, "onSwiped called");
+
+            // Get ready to swipe
+            int position = viewHolder.getAdapterPosition();
+            final Player removedPlayer = mPlayers.get(position);       // Temporarily store the name in case it needs to be revived
+
+            // Remove the item
+            mPlayers.remove(position);
+
+            // showing snack bar with Undo option
+            Snackbar snackbar = Snackbar
+                    .make(viewHolder.itemView, removedPlayer.getpName() + " removed from cart!", Snackbar.LENGTH_LONG);
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // undo is selected, restore the deleted item
+                    mPlayers.add(removedPlayer);
+                    adapter.notifyDataSetChanged();
+                }
+            });
+            snackbar.setActionTextColor(Color.GREEN);
+            snackbar.show();
+
+            adapter.notifyDataSetChanged();
+        }
+
+        // Below method to allow movement by long pressing a list item
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            Log.d(TAG, "onMove called");
+            final int fromPosition = viewHolder.getAdapterPosition();
+            final int toPosition = target.getAdapterPosition();
+            if (fromPosition < toPosition) {
+                Log.w(TAG, "Entered if loop to swap position");
+                for (int i = fromPosition; i < toPosition; i++) {
+                    Collections.swap(mPlayers, i, i + 1);
+                }
+            } else {
+                Log.w(TAG, "Entered else loop to swap position");
+                for (int i = fromPosition; i > toPosition; i--) {
+                    Collections.swap(mPlayers, i, i - 1);
+                }
+            }
+            adapter.notifyItemMoved(fromPosition, toPosition);
+            return true;
+        }
+    };
 }

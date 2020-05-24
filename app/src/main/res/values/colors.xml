@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimary">#BDBDBD</color>
     <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#1e88e5</color>
+    <color name="colorAccent">#3700B3</color>
     <color name="colorAccentLight">#6ab7ff</color>
     <color name="colorRed">#FF1744</color>
     <color name="colorButton">#26C6DA</color>
@@ -10,6 +10,9 @@
     <color name="colorButtonText">#3700B3</color>
     <color name="colorHeader">#00E676</color>
     <color name="labelTextColor">#000000</color>
+    <color name="toolbartext">#000000</color>
+    <color name="toolbarbkgnd">#FFEB3B</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="lightGrey">#BDBDBD</color>
 </resources>

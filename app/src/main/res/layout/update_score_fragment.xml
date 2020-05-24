@@ -7,15 +7,32 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp">
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/usftoolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbarbkgnd"
+            android:minHeight="?attr/actionBarSize"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/USFtoolbar_title"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Update Scores"
+                android:textColor="@color/toolbartext" />
+        </androidx.appcompat.widget.Toolbar>
 
         <TextView
             android:id="@+id/thisRoundTextView"
             style="@style/mainRelLayout"
-            android:layout_marginBottom="12dp"
-            android:padding="8dp"
+            android:layout_below="@id/usftoolbar"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:text="@string/thisRoundTextView_hint"
             android:textColor="@color/labelTextColor"
             android:textSize="@dimen/labelSize" />

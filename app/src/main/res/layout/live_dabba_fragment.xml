@@ -8,14 +8,30 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/ldftoolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbarbkgnd"
+            android:minHeight="?attr/actionBarSize">
+
+            <TextView
+                android:id="@+id/USFtoolbar_title"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="Live Game"
+                android:textColor="@color/toolbartext" />
+        </androidx.appcompat.widget.Toolbar>
 
         <LinearLayout
             android:id="@+id/game_Strip"
             style="@style/mainRelLayout"
-            android:layout_margin="@dimen/label_margin"
+            android:layout_marginTop="@dimen/label_margin"
+            android:layout_below="@id/ldftoolbar"
             android:orientation="horizontal">
 
             <TextView
@@ -43,7 +59,6 @@
                 android:id="@+id/max_score_label"
                 style="@style/innerRelLayout"
                 android:layout_height="match_parent"
-                android:layout_weight="0.6"
                 android:gravity="center_vertical"
                 android:text="@string/score_label"
                 android:textSize="@dimen/buttonTextSize" />
@@ -58,14 +73,6 @@
                 android:text="@string/score_TextView"
                 android:textSize="@dimen/buttonTextSize" />
 
-            <ImageButton
-                android:id="@+id/changeMaxScoreButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/max_scoreText"
-                android:layout_toRightOf="@id/max_scoreText"
-                android:padding="4dp"
-                android:src="@drawable/pencil_24dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -78,7 +85,6 @@
             <TextView
                 android:id="@+id/betamt_label"
                 style="@style/innerRelLayout"
-                android:layout_weight="0.6"
                 android:text="@string/betamt_label"
                 android:textSize="@dimen/buttonTextSize" />
 
@@ -88,14 +94,6 @@
                 android:layout_toRightOf="@id/betamt_label"
                 android:textSize="@dimen/buttonTextSize" />
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/max_scoreText"
-                android:layout_toRightOf="@id/max_scoreText"
-                android:padding="4dp"
-                android:visibility="invisible"
-                android:src="@drawable/pencil_24dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -108,7 +106,6 @@
             <TextView
                 android:id="@+id/roundno_label"
                 style="@style/innerRelLayout"
-                android:layout_weight="0.6"
                 android:text="@string/roundno_label"
                 android:textSize="@dimen/buttonTextSize" />
 
@@ -118,14 +115,6 @@
                 android:layout_toRightOf="@id/roundno_label"
                 android:textSize="@dimen/buttonTextSize" />
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/max_scoreText"
-                android:layout_toRightOf="@id/max_scoreText"
-                android:padding="4dp"
-                android:visibility="invisible"
-                android:src="@drawable/pencil_24dp" />
         </LinearLayout>
 
         <LinearLayout

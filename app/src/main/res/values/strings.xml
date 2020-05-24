@@ -35,4 +35,5 @@
     <string name="thisRoundTextView_hint">Please update this Round\'s Scores:</string>
     <string name="players_chosen">Players Chosen:</string>
     <string name="help">Help</string>
+    <string name="changeMaxScore">Change Max Score</string>
 </resources>
