@@ -24,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -44,17 +43,12 @@ import java.util.List;
 
 // This class is to set up the game with the max score, game bet amount and the no. of players. No. of players is restricted to 20 for now.
 
-// Next update to include the players' list as ArrayList in the Dabba object. This object should be passed along to LDF and USF and its elements should be updated in LDF and USF via code
-
 public class NewDabbaFragment extends Fragment {
     private EditText scoreText, betamtText;
     private Button addMeButton, addPlayersButton;
     private ExtendedFloatingActionButton startGameButton, resetPlayersButton;
     private TextView mDateView;
     private static final String TAG = "NewDabbaTAG";
-    public static final String NDF_GAME_DATE = "date", NDF_MAX_SCORE = "max_score", NDF_BET_AMT = "bet_amts", NDF_LIVE_SCORE = "live_score", NDF_REENTRY = "re-entry";
-    public static final String NDF_PLAYERS_LIST = "players", NDF_COUNT = "PLAYERS_COUNT", NDF_ROUND = "roundno", NDF_DEALERNO = "dealerno";
-    public static final String NDF_DABBA = "GAME_DABBA";
     private Dabba mDabba;
     private AlertDialog checkDialog;
     private String date;
@@ -212,9 +206,6 @@ public class NewDabbaFragment extends Fragment {
                             .beginTransaction()
                             .replace(R.id.fragmentContainer, liveDabbaFragment)
                             .commit();
-                    /*Intent i = new Intent(getActivity(), LiveDabbaActivity.class);
-                    i.putExtra("GAME_DABBA", mDabba);
-                    startActivity(i);*/
                 }
             }
         });
@@ -264,7 +255,6 @@ public class NewDabbaFragment extends Fragment {
                 c.close();
                 return;
             }
-            //Log.e(TAG, "Chosen no. of contacts: " + c.getCount());
             // Pull out the first column of the first row of data - that is the player's name
             c.moveToFirst();        // Since the Cursor object only contains one item, move to the first item and get it as a String
             String player_temp = c.getString(0);
@@ -314,15 +304,17 @@ public class NewDabbaFragment extends Fragment {
         // Below function to define what is to be done, Undo option available
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-            Log.d(TAG, "onSwiped called");
-
+            //Log.d(TAG, "onSwiped called");
             // Get ready to swipe
             int position = viewHolder.getAdapterPosition();
             final Player removedPlayer = mPlayers.get(position);       // Temporarily store the name in case it needs to be revived
-
+            String tempname = mPlayers.get(position).getpName();
+            Log.i(TAG, "Deleting player: " + tempname);
             // Remove the item
             mPlayers.remove(position);
 
+            if (tempname.equals("Me"))
+                addMeButton.setEnabled(true);    // In case, Me is deleted, the Me button is enabled
             // showing snack bar with Undo option
             Snackbar snackbar = Snackbar
                     .make(viewHolder.itemView, removedPlayer.getpName() + " removed from cart!", Snackbar.LENGTH_LONG);

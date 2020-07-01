@@ -132,15 +132,22 @@
             android:id="@+id/choose_PlayersView"
             style="@style/mainRelLayout"
             android:layout_below="@id/addPlayers_Strip"
-            android:layout_margin="8dp"
             android:text="@string/players_chosen"
             android:textSize="@dimen/headerSize"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/chooseplayershint"
+            style="@style/mainRelLayout"
+            android:layout_below="@id/choose_PlayersView"
+            android:text="@string/choosehint"
+            android:textSize="@dimen/headerSize"
+            android:textStyle="italic" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/playersRecyclerView"
             style="@style/mainRelLayout"
-            android:layout_below="@id/choose_PlayersView"
+            android:layout_below="@id/chooseplayershint"
             android:background="@drawable/view_selector"
             android:scrollbars="vertical" />
     </RelativeLayout>

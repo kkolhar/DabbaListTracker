@@ -35,4 +35,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha06'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'            // This gradle is required for the extended FAB
     implementation 'androidx.recyclerview:recyclerview:1.1.0'// Required for RecyclerView
+    implementation 'com.google.code.gson:gson:2.8.5' // To store objects in SharedPreferences
 }

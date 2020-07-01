@@ -21,7 +21,7 @@
     <string name="choose_players">Add Others</string>
     <string name="new_game_properties">"Enter new game properties: "</string>
     <string name="game_dateSelector">"Initiated at: "</string>
-    <string name="scoreBoard">"------ Score Board ------"</string>
+    <string name="scoreBoard">"Score Board"</string>
     <string name="cancel_creategame">Cancel</string>
     <string name="create_game">Start Game</string>
     <string name="bet_amt">"Bet Amt. per Person (Rs.): "</string>
@@ -36,4 +36,5 @@
     <string name="players_chosen">Players Chosen:</string>
     <string name="help">Help</string>
     <string name="changeMaxScore">Change Max Score</string>
+    <string name="choosehint">(Swipe left/right to remove a player. Long-press a player to re-arrange the list)</string>
 </resources>

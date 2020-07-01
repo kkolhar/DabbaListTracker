@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -48,7 +49,6 @@ public class LiveDabbaFragment extends Fragment {
     private TextView date_TextView, score_TextView, betamt_TextView, roundno_TextView, liveNameView, liveScoreView;
     private ExtendedFloatingActionButton nextRound, exitGame;
     private TableLayout playersLiveView;
-    private static final String TAG = "LiveDabbaTAG";
     private Bundle fromNDFBundle;
     private AlertDialog restartDialog, changeScoreDialog;
     private static int singlebetamount, gamebet, maxscore, LDFLiveCount, gLosers, highscore;
@@ -58,23 +58,29 @@ public class LiveDabbaFragment extends Fragment {
     private TableRow.LayoutParams namecellParams, middlecellParams, liveScorecellParams;
     private int roundcount, dealerno;
     private static Animation shakeAnimation;
-    //private ImageButton changeMaxScoreButton;
     private Button[] LDFreentryButtons;
     private Dabba LDFDabba;
     private ArrayList<Player> ldf_ALplayers;
     private Toolbar toolbar;
+    private static final String TAG = "LiveDabbaTAG";
+    private static String filename = "dabbas.json";
+    private SharedPreferences mPrefs;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate() called");
         setRetainInstance(true);
         setHasOptionsMenu(true);
         getActivity().setTitle(R.string.app_name);
-
-        Log.e(TAG, "**************************************************LDF Bundle Arguments: " + this.getArguments());
-
-        // get all the variables from LDF as a Bundle. This bundle continues to exist during the entire activity
+        // Log.e(TAG, "**************************************************LDF Bundle Arguments: " + this.getArguments());
+        /*if (savedInstanceState != null) {
+            Log.i(TAG, "Loading savedInstanceState");
+            LDFDabba = (Dabba) savedInstanceState.get("RETAINED_DABBA");
+        }*/
         LDFDabba = this.getArguments().getParcelable("GAME_DABBA");
+        // get all the variables from LDF as a Bundle. This bundle continues to exist during the entire activity
+
         ldf_ALplayers = LDFDabba.getPlayers();
         LDFLiveCount = ldf_ALplayers.size();            // Get the count of players which will be used throughout this class
         Log.d(TAG, "globalLiveCount: " + LDFLiveCount);
@@ -103,8 +109,7 @@ public class LiveDabbaFragment extends Fragment {
         // Initialize the round count
         roundcount = LDFDabba.getRoundNo();
 
-        // Initialize the dealer no.
-        // to be completed
+        // TODO: Work on choosing the next dealer
         // dealerno = fromNDFBundle.getInt("dealerno");
 
         // Setting each cell's parameters used ahead in the ScoreTable
@@ -120,7 +125,7 @@ public class LiveDabbaFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.live_dabba_fragment, parent, false);
-        Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
+        //Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
 
         // toolBar is a simpler way to create an ActionBar in androidx. Earlier, there was ActionBar which was painful
         toolbar = (Toolbar) v.findViewById(R.id.ldftoolbar);

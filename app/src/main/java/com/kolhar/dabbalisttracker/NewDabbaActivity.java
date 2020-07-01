@@ -2,9 +2,9 @@ package com.kolhar.dabbalisttracker;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,7 +12,11 @@ import androidx.fragment.app.Fragment;
 
 public class NewDabbaActivity extends SingleFragmentActivity {
     private AlertDialog dialog;
-    private static final String TAG = "ActivityDabbaTAG", GAME_DABBA="GAME_DABBA";
+    private static final String TAG = "ActivityDabbaTAG";
+    private Fragment startingFragment;
+    private Dabba retrievedDabba;
+    private Context context;
+    private String filename = "dabbas.json";
 
     @Override
     protected Fragment createFragment() {
@@ -59,4 +63,16 @@ public class NewDabbaActivity extends SingleFragmentActivity {
         dialog.show();
     }
 
+    /*@Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            Log.i(TAG, "Loading savedInstanceState");
+            retrievedDabba = (Dabba) savedInstanceState.get("RETAINED_DABBA");
+            startingFragment = new LiveDabbaFragment(retrievedDabba);
+        } else {
+            Log.i(TAG, "Loading new Instance State of LiveDabba");
+            startingFragment = new NewDabbaFragment();
+        }
+    }*/
 }

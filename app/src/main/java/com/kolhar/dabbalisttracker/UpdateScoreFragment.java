@@ -19,7 +19,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -31,7 +30,6 @@ import java.util.List;
 
 public class UpdateScoreFragment extends Fragment {
     public static final String TAG = "UpdateScoreDabbaTAG";
-    //private String[] globalplNames;
     private int[] individualRoundScores;
     private Bundle toLDFBundle;
     private TableLayout tempTable;
@@ -82,13 +80,9 @@ public class UpdateScoreFragment extends Fragment {
 
         // Create the tempTable in the below for loop
         for (int i = 0; i <= USFLiveCount; i++) {
-            //Log.d(TAG, "Value of i is: " + i);
-
             TableRow row = new TableRow(getContext());
-
             row.setLayoutParams(rowParams);
             row.setWeightSum(1f);
-            // Log.d(TAG, "counter Value is: " + counter);
 
             tempNameView = new TextView(getContext());
             tempNameView.setTextSize(14);
