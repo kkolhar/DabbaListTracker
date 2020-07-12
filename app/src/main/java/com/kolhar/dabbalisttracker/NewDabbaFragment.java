@@ -187,7 +187,7 @@ public class NewDabbaFragment extends Fragment {
             player.setpName(player_temp);
             mPlayers.add(player);
             adapter.notifyDataSetChanged();
-            Log.e(TAG, "Adapter updated with: " + player.getpName());
+            //Log.e(TAG, "Adapter updated with: " + player.getpName());
             c.close();
         }
     }
@@ -230,7 +230,7 @@ public class NewDabbaFragment extends Fragment {
                 player.setpName("Me");
                 mPlayers.add(player);
                 adapter.notifyDataSetChanged();
-                Log.i(TAG, "RecyclerView has adapter: " + recyclerView.hasPendingAdapterUpdates());
+                //Log.i(TAG, "RecyclerView has adapter: " + recyclerView.hasPendingAdapterUpdates());
                 addMeButton.setEnabled(false);
             }
         });

@@ -174,18 +174,4 @@
         android:theme="@style/Theme.MaterialComponents.NoActionBar"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/exit_FABButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
-        android:layout_margin="@dimen/fab_margin"
-        android:backgroundTint="@color/colorButton"
-        android:enabled="false"
-        android:gravity="center"
-        android:text="@string/exit_game_text"
-        android:theme="@style/Theme.MaterialComponents.NoActionBar"
-        android:visibility="invisible"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -27,10 +27,6 @@
             android:label="@string/app_name" />
 
         <activity
-            android:name="com.kolhar.dabbalisttracker.WinnerActivity"
-            android:label="@string/app_name" />
-
-        <activity
             android:name="com.kolhar.dabbalisttracker.LiveDabbaActivity"
             android:label="@string/app_name" />
 

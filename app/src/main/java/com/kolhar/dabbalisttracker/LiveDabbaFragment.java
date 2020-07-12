@@ -35,7 +35,6 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
@@ -46,7 +45,7 @@ import java.util.List;
 
 public class LiveDabbaFragment extends Fragment {
     private TextView date_TextView, score_TextView, betamt_TextView, roundno_TextView, liveNameView, liveScoreView;
-    private ExtendedFloatingActionButton nextRound, exitGame;
+    private ExtendedFloatingActionButton nextRound;
     private TableLayout playersLiveView;
     private AlertDialog restartDialog, changeScoreDialog;
     private static int singlebetamount, gamebet, maxscore, LDFLiveCount, gLosers, highscore;
@@ -60,13 +59,6 @@ public class LiveDabbaFragment extends Fragment {
     private Dabba LDFDabba;
     private ArrayList<Player> ldf_ALplayers;
     private Toolbar toolbar;
-    // Below is a common listener for all the re-entry buttons for individual players - Updated
-    View.OnClickListener reentryButtonListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            //Log.d(TAG, "getting ID of player to be changed: " + v.getId());
-            onReEntryFunction(v.getId());       // Get the player's ID and pass it to the onReEntryFunction to activate re-entry option
-        }
-    };
     private String date;
 
     @Override
@@ -118,6 +110,49 @@ public class LiveDabbaFragment extends Fragment {
 
         // initiate the animation for the kavti view
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.live_dabba_fragment, parent, false);
+        //Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
+
+        // toolBar is a simpler way to create an ActionBar in androidx. Earlier, there was ActionBar which was painful
+        toolbar = (Toolbar) v.findViewById(R.id.ldftoolbar);
+
+        // Initializing all the views for a Live game
+        date_TextView = v.findViewById(R.id.game_dateText);
+        score_TextView = v.findViewById(R.id.max_scoreText);     // Shows the max score set for the game
+        betamt_TextView = v.findViewById(R.id.bet_Text);        // Shows the bet amount for the game
+        //changeMaxScoreButton = v.findViewById(R.id.changeMaxScoreButton);
+        roundno_TextView = v.findViewById(R.id.roundno_Text);     // Shows the round no. for each round
+        playersLiveView = (TableLayout) v.findViewById(R.id.liveScoreTables);
+        nextRound = (ExtendedFloatingActionButton) v.findViewById(R.id.next_RoundFABButton);
+
+        // Set the date, maxScore, total bet_Amount and round_count for the game. Only the total bet_Amount will vary in case of re-Entry
+        date_TextView.setText(date);
+        score_TextView.setText(String.valueOf(maxscore));
+        betamt_TextView.setText(String.valueOf(gamebet));
+        roundno_TextView.setText(String.valueOf(roundcount));
+
+        // Button to update the scores for each round. All the variables are put in the fromNDFBundle and passed to UpdateScoreFragment. Only some of them are used/updated in the USFragment
+        nextRound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create the new fragment and pass the bundle using .setArguments()
+                Fragment updateScoreFragment = new UpdateScoreFragment(LDFDabba);
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentContainer, updateScoreFragment)
+                        .commit();
+            }
+        });
+
+        // Set up the ScoreTable using the various parameters from the fromNDFBundle
+        tempPlayersLayout();
+
+        return v;
     }
 
     // Inflating the Options menu in the toolbar and setting up a listener on the various options
@@ -221,71 +256,56 @@ public class LiveDabbaFragment extends Fragment {
                         ldf_ALplayers.get(i - 1).setReEntry(3);
                 }
 
-                if (checkWinner()) {            // Keep checking if all have lost and we have a final winner
-                    row.addView(liveNameView);
+                row.addView(liveNameView);
 
-                    // enter if loop in case the player has lost
-                    if (score >= maxscore) {
-                        // in case the player has lost and this was his first loss, enter the below if loop
-                        if (reentry == 0) {
-                            //Log.d(TAG, "Added the Re-Entry button");
-                            ldf_ALplayers.get(i - 1).setReEntry(1);
-                            LDFreentryButtons[i - 1] = new Button(getActivity());
-                            LDFreentryButtons[i - 1].setText("Re-Entry");
-                            LDFreentryButtons[i - 1].setId(i - 1);         // Setting the reEntryButton ID equal to the player no.
-                            LDFreentryButtons[i - 1].setOnClickListener(reentryButtonListener);    // Setting the listener for the corresponding button
+                // enter if loop in case the player has lost
+                if (score >= maxscore) {
+                    // in case the player has lost and this was his first loss, enter the below if loop
+                    if (reentry == 0) {
+                        //Log.d(TAG, "Added the Re-Entry button");
+                        ldf_ALplayers.get(i - 1).setReEntry(1);
+                        LDFreentryButtons[i - 1] = new Button(getActivity());
+                        LDFreentryButtons[i - 1].setText("Re-Entry");
+                        LDFreentryButtons[i - 1].setId(i - 1);         // Setting the reEntryButton ID equal to the player no.
+                        LDFreentryButtons[i - 1].setOnClickListener(reentryButtonListener);    // Setting the listener for the corresponding button
 
-                            row.addView(LDFreentryButtons[i - 1]);
-                        }
-                        // in case the player has lost and this was his second loss, enter the below if loop
-                        else if (reentry == 1) {
-                            Log.d(TAG, "One re-entry for this player is done: " + ldf_ALplayers.get(i - 1).getpName());
-                            ldf_ALplayers.get(i - 1).setReEntry(3);
-                        }
-
-                        // initiate the kavti view
-                        LDFkavtiView = new ImageView(getContext());
-                        LDFkavtiView.setImageResource(R.drawable.kavti);
-                        LDFkavtiView.setLayoutParams(liveScorecellParams);
-                        row.addView(LDFkavtiView);
-                        LDFkavtiView.startAnimation(shakeAnimation);
-                        if (reentry != 4) {       // if the player has lost in the previous round, don't play the sound again
-                            MediaPlayer mp = MediaPlayer.create(getActivity(), R.raw.wickedwitchlaugh);
-                            mp.start();
-                            ldf_ALplayers.get(i - 1).setReEntry(4);
-                        }
+                        row.addView(LDFreentryButtons[i - 1]);
+                    }
+                    // in case the player has lost and this was his second loss, enter the below if loop
+                    else if (reentry == 1) {
+                        Log.d(TAG, "One re-entry for this player is done: " + ldf_ALplayers.get(i - 1).getpName());
+                        ldf_ALplayers.get(i - 1).setReEntry(3);
                     }
 
-                    // in case he has not lost yet, just display his score
-                    else {
-                        row.addView(liveScoreView);
+                    // initiate the kavti view
+                    LDFkavtiView = new ImageView(getContext());
+                    LDFkavtiView.setImageResource(R.drawable.kavti);
+                    LDFkavtiView.setLayoutParams(liveScorecellParams);
+                    row.addView(LDFkavtiView);
+                    LDFkavtiView.startAnimation(shakeAnimation);
+                    if (reentry != 4) {       // if the player has lost in the previous round, don't play the sound again
+                        MediaPlayer mp = MediaPlayer.create(getActivity(), R.raw.wickedwitchlaugh);
+                        mp.start();
+                        ldf_ALplayers.get(i - 1).setReEntry(4);
                     }
-                    playersLiveView.addView(row, i);        // add the row to the table
                 }
-                // If all the players have lost and we have a final winner, find the winner in the for loop and declare him
+
+                // in case he has not lost yet, just display his score
                 else {
-                    for (int winc = 0; winc < LDFLiveCount; winc++) {
-                        if (ldf_ALplayers.get(winc).getLiveScore() < maxscore) {
-                            winner = ldf_ALplayers.get(winc).getpName();
-                        } else {
-                            losersList(ldf_ALplayers.get(winc).getpName(), ldf_ALplayers.get(winc).getLiveScore());
-                        }
-                    }
-
-                    //  Play the sound for one last time
-                    MediaPlayer mp = MediaPlayer.create(getActivity(), R.raw.wickedwitchlaugh);
-                    mp.start();
-
-                    restartDialog = new AlertDialog.Builder(getActivity()).create();
-                    restartDialog.setTitle("Game Over!");
-                    restartDialog.setMessage("Winner: " + winner + "!!!\n\n" + "Losers: \n" + losers +
-                            "\n Do you want to restart a new game?");
-                    restartDialog = exitAlertMethod(restartDialog);
-                    restartDialog.show();
+                    row.addView(liveScoreView);
                 }
+                playersLiveView.addView(row, i);        // add the row to the table
             }
         }
     }
+
+    // Below is a common listener for all the re-entry buttons for individual players - Updated
+    View.OnClickListener reentryButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            //Log.d(TAG, "getting ID of player to be changed: " + v.getId());
+            onReEntryFunction(v.getId());       // Get the player's ID and pass it to the onReEntryFunction to activate re-entry option
+        }
+    };
 
     // Check if we have a final Winner - Updated
     private boolean checkWinner() {
@@ -293,92 +313,6 @@ public class LiveDabbaFragment extends Fragment {
             return false;
         // return true in case winner is found
         return true;
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.live_dabba_fragment, parent, false);
-        //Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
-
-        // toolBar is a simpler way to create an ActionBar in androidx. Earlier, there was ActionBar which was painful
-        toolbar = (Toolbar) v.findViewById(R.id.ldftoolbar);
-
-        // Initializing all the views for a Live game
-        date_TextView = v.findViewById(R.id.game_dateText);
-        score_TextView = v.findViewById(R.id.max_scoreText);     // Shows the max score set for the game
-        betamt_TextView = v.findViewById(R.id.bet_Text);        // Shows the bet amount for the game
-        //changeMaxScoreButton = v.findViewById(R.id.changeMaxScoreButton);
-        roundno_TextView = v.findViewById(R.id.roundno_Text);     // Shows the round no. for each round
-        playersLiveView = (TableLayout) v.findViewById(R.id.liveScoreTables);
-        exitGame = (ExtendedFloatingActionButton) v.findViewById(R.id.exit_FABButton);
-        nextRound = (ExtendedFloatingActionButton) v.findViewById(R.id.next_RoundFABButton);
-
-        // Set the date, maxScore, total bet_Amount and round_count for the game. Only the total bet_Amount will vary in case of re-Entry
-        date_TextView.setText(date);
-        score_TextView.setText(String.valueOf(maxscore));
-        betamt_TextView.setText(String.valueOf(gamebet));
-        roundno_TextView.setText(String.valueOf(roundcount));
-
-        // In case, the game has to be exited in between
-        exitGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {       // Dialog box to start a new game or close the app
-                restartDialog = new AlertDialog.Builder(getActivity()).create();
-                restartDialog.setTitle("Exit Game");
-                restartDialog.setMessage("Do you want to restart a new game?");
-                restartDialog = exitAlertMethod(restartDialog);  // DialogBox button options and actions are set in a separate class
-                restartDialog.show();
-            }
-        });
-
-        // Button to update the scores for each round. All the variables are put in the fromNDFBundle and passed to UpdateScoreFragment. Only some of them are used/updated in the USFragment
-        nextRound.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Create the new fragment and pass the bundle using .setArguments()
-                Fragment updateScoreFragment = new UpdateScoreFragment(LDFDabba);
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragmentContainer, updateScoreFragment)
-                        .commit();
-            }
-        });
-
-        // Set up the ScoreTable using the various parameters from the fromNDFBundle
-        tempPlayersLayout();
-
-        return v;
-    }
-
-    // Code to be added to create a list of games screen at launch
-    // DialogBox to either quit or start a new game - Updated
-    private AlertDialog exitAlertMethod(AlertDialog dialog) {
-        dialog.setButton(Dialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Fragment restartGame = new NewDabbaFragment();
-                getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragmentContainer, restartGame)
-                        .commit();
-            }
-        });
-        dialog.setButton(Dialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ldf_ALplayers.removeAll(ldf_ALplayers);     // Need to check
-                getActivity().finish();
-            }
-        });
-        dialog.setButton(Dialog.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        return dialog;
     }
 
     // Re-Entry function to check for re-entry validation - Updated
@@ -412,10 +346,6 @@ public class LiveDabbaFragment extends Fragment {
         ldf_ALplayers.get(ientry).setReEntry(2);           // This set the globalReentries for that player = 2 i.e. lost once and re-entered
 
         Toast.makeText(getActivity(), "Re-entry given to " + name + ", bet amount: " + betamnt, Toast.LENGTH_LONG).show();
-    }
-
-    private void losersList(String loser, int loserScore) {
-        losers = losers + " " + loser + ": " + loserScore + "\n";
     }
 
     // DialogBox to either quit or start a new game - Updated
