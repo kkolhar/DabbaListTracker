@@ -29,12 +29,12 @@ import java.util.List;
 // This class is used to accept scores for the new round, if the player is still in the game
 
 public class UpdateScoreFragment extends Fragment {
-    public static final String TAG = "UpdateScoreDabbaTAG";
+    private static final String TAG = "UpdateDabbaFragmentTAG";
     private int[] individualRoundScores;
-    private Bundle toLDFBundle;
     private TableLayout tempTable;
     private ExtendedFloatingActionButton doneButton, cancelButton;
     private int USFMaxScore;
+    private Bundle toLDFBundle;
     private TextView tempNameView, tempScoreView, firstUpdateView;
     private ImageView USFkavtiView;
     private EditText tempNewScoreEdit;
@@ -45,6 +45,11 @@ public class UpdateScoreFragment extends Fragment {
     private int dealerno;
     private Dabba USFDabba;
     private ArrayList<Player> usf_ALplayers;
+    private DabbaJSONSerializer djSerializer;
+
+    public UpdateScoreFragment(Dabba dabba) {
+        USFDabba = dabba;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +57,6 @@ public class UpdateScoreFragment extends Fragment {
         setRetainInstance(true);
 
         // get all the variables from LDF as a Bundle. This bundle continues to exist during the entire activity
-        USFDabba = this.getArguments().getParcelable("GAME_DABBA");
         usf_ALplayers = USFDabba.getPlayers();
         USFLiveCount = usf_ALplayers.size();            // Get the count of players
         Log.d(TAG, "globalLiveCount: " + USFLiveCount);
@@ -110,7 +114,6 @@ public class UpdateScoreFragment extends Fragment {
             USFkavtiView.setLayoutParams(newScorecellParams);
             // Below if loop to create the first row of headers: 'Player', 'Existing' and 'This Round'
             if (i == 0) {
-                //Log.w(TAG, "Entered if statement to create first row");
                 tempNameView.setText("Player");
                 tempScoreView.setText("Existing");
                 firstUpdateView.setText("This Round");
@@ -127,7 +130,6 @@ public class UpdateScoreFragment extends Fragment {
             // Continue looping through the various bundle arrays and show them in the table
             else {
                 int score = usf_ALplayers.get(i - 1).getLiveScore();
-                // Log.w(TAG, "Entered else statement to create further rows");
                 tempNameView.setText(usf_ALplayers.get(i - 1).getpName());
                 tempScoreView.setText(String.valueOf(score));
 
@@ -142,6 +144,9 @@ public class UpdateScoreFragment extends Fragment {
                 }
                 // If the player is still in the game, enter his row to take in new scores
                 else {
+                    if (score >= (USFMaxScore - 20)) {
+                        tempScoreView.setTextColor(Color.BLUE);
+                    }
                     row.addView(tempNameView);
                     row.addView(tempScoreView);
                     row.addView(tempNewScoreEdit);
@@ -243,9 +248,18 @@ public class UpdateScoreFragment extends Fragment {
 
     // Start the LDF Fragment after all scores are entered and validated - Updated
     private void startLDFFragment() {
+
+        // Save the dabba on each update
+        djSerializer = new DabbaJSONSerializer(getActivity());
+        try {
+            djSerializer.saveDabba(USFDabba);
+        } catch (Exception e) {
+            Log.e(TAG, "Error in LiveDabbaFragment: " + e);
+        }
+
         toLDFBundle = new Bundle();
         Fragment ldFragment = new LiveDabbaFragment();
-        toLDFBundle.putParcelable("GAME_DABBA", USFDabba);
+        toLDFBundle.putSerializable("LIVEDABBA", USFDabba);
         ldFragment.setArguments(toLDFBundle);
         getActivity().getSupportFragmentManager()
                 .beginTransaction()
@@ -253,4 +267,3 @@ public class UpdateScoreFragment extends Fragment {
                 .commit();
     }
 }
-

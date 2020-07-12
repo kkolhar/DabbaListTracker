@@ -22,36 +22,36 @@
                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left"
+                android:layout_gravity="center"
                 android:text="Live Game"
                 android:textColor="@color/toolbartext" />
         </androidx.appcompat.widget.Toolbar>
 
         <LinearLayout
-            android:id="@+id/game_Strip"
+            android:id="@+id/date_Strip"
             style="@style/mainRelLayout"
-            android:layout_marginTop="@dimen/label_margin"
             android:layout_below="@id/ldftoolbar"
+            android:layout_margin="@dimen/label_margin"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/game_label"
+                android:id="@+id/date_label"
                 style="@style/innerRelLayout"
-                android:text="@string/newgame_TextView"
+                android:text="@string/date_labelString"
                 android:textSize="@dimen/buttonTextSize" />
 
             <TextView
                 android:id="@+id/game_dateText"
                 style="@style/innerRelLayout"
-                android:layout_toRightOf="@id/game_label"
-                android:text="@string/game_date"
+                android:layout_toRightOf="@id/date_label"
+                android:text="@string/game_dateString"
                 android:textSize="@dimen/buttonTextSize" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/score_Strip"
             style="@style/mainRelLayout"
-            android:layout_below="@id/game_Strip"
+            android:layout_below="@id/date_Strip"
             android:layout_margin="@dimen/label_margin"
             android:orientation="horizontal">
 
@@ -165,7 +165,7 @@
         android:id="@+id/next_RoundFABButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|start"
+        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/colorButton"
         android:gravity="center"
@@ -178,12 +178,14 @@
         android:id="@+id/exit_FABButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/colorButton"
+        android:enabled="false"
         android:gravity="center"
         android:text="@string/exit_game_text"
         android:theme="@style/Theme.MaterialComponents.NoActionBar"
+        android:visibility="invisible"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,17 +1,17 @@
 <resources>
     <string name="app_name">Dabba Tracker</string>
-    <string name="newgame_TextView">New Game Properties</string>
+    <string name="date_labelString">Game Date</string>
     <string name="score_label">Max Game Score: </string>
     <string name="score_TextView">201</string>
     <string name="roundno_label">Round No.:  </string>
     <string name="roundno_TextView">420</string>
     <string name="betamt_label">"Game Bet Amount: "</string>
     <string name="betamt_TextView">5234</string>
-    <string name="start_new_game">Start New Game</string>
+    <string name="start_new_game">New Game</string>
     <string name="dabba_history">Dabba History</string>
     <string name="game_title">Game Title</string>
     <string name="game_winner">Game Winner</string>
-    <string name="game_date">Game Date</string>
+    <string name="game_dateString">Game Date</string>
     <string name="clear_history">Clear History</string>
     <string name="new_dabba">New Dabba</string>
     <string name="next_round_Button">Next Round</string>
@@ -37,4 +37,12 @@
     <string name="help">Help</string>
     <string name="changeMaxScore">Change Max Score</string>
     <string name="choosehint">(Swipe left/right to remove a player. Long-press a player to re-arrange the list)</string>
+    <string name="previous_game">Load Previous Game</string>
+    <string name="winner_labelString">Winner:</string>
+    <string name="winner_NameString">ABC</string>
+    <string name="winner_AmtLabel">Winnings:</string>
+    <string name="winner_AmtString">50000</string>
+    <string name="final_ScoresString">Final Scores</string>
+    <string name="retry_Button">Retry</string>
+    <string name="done_text">Done</string>
 </resources>

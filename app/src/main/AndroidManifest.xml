@@ -14,13 +14,25 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="com.kolhar.dabbalisttracker.NewDabbaActivity"
+            android:name="com.kolhar.dabbalisttracker.FirstScreenActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.kolhar.dabbalisttracker.NewDabbaActivity"
+            android:label="@string/app_name" />
+
+        <activity
+            android:name="com.kolhar.dabbalisttracker.WinnerActivity"
+            android:label="@string/app_name" />
+
+        <activity
+            android:name="com.kolhar.dabbalisttracker.LiveDabbaActivity"
+            android:label="@string/app_name" />
 
     </application>
 

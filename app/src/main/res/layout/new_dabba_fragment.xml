@@ -153,14 +153,14 @@
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/reset_playersFABButton"
+        android:id="@+id/cancelNGFABButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|start"
         android:layout_margin="@dimen/fab_margin"
         android:backgroundTint="@color/colorButton"
         android:gravity="center"
-        android:text="@string/reset_list"
+        android:text="@string/cancel_creategame"
         android:theme="@style/Theme.MaterialComponents.NoActionBar"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 

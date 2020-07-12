@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
@@ -36,10 +35,10 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,10 +48,9 @@ public class LiveDabbaFragment extends Fragment {
     private TextView date_TextView, score_TextView, betamt_TextView, roundno_TextView, liveNameView, liveScoreView;
     private ExtendedFloatingActionButton nextRound, exitGame;
     private TableLayout playersLiveView;
-    private Bundle fromNDFBundle;
     private AlertDialog restartDialog, changeScoreDialog;
     private static int singlebetamount, gamebet, maxscore, LDFLiveCount, gLosers, highscore;
-    private static String date;
+    private static final String TAG = "LiveDabbaFragmentTAG";
     private String winner, losers = "";
     private ImageView LDFkavtiView;
     private TableRow.LayoutParams namecellParams, middlecellParams, liveScorecellParams;
@@ -62,31 +60,31 @@ public class LiveDabbaFragment extends Fragment {
     private Dabba LDFDabba;
     private ArrayList<Player> ldf_ALplayers;
     private Toolbar toolbar;
-    private static final String TAG = "LiveDabbaTAG";
-    private static String filename = "dabbas.json";
-    private SharedPreferences mPrefs;
+    // Below is a common listener for all the re-entry buttons for individual players - Updated
+    View.OnClickListener reentryButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            //Log.d(TAG, "getting ID of player to be changed: " + v.getId());
+            onReEntryFunction(v.getId());       // Get the player's ID and pass it to the onReEntryFunction to activate re-entry option
+        }
+    };
+    private String date;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG, "onCreate() called");
         setRetainInstance(true);
         setHasOptionsMenu(true);
         getActivity().setTitle(R.string.app_name);
-        // Log.e(TAG, "**************************************************LDF Bundle Arguments: " + this.getArguments());
-        /*if (savedInstanceState != null) {
-            Log.i(TAG, "Loading savedInstanceState");
-            LDFDabba = (Dabba) savedInstanceState.get("RETAINED_DABBA");
-        }*/
-        LDFDabba = this.getArguments().getParcelable("GAME_DABBA");
-        // get all the variables from LDF as a Bundle. This bundle continues to exist during the entire activity
+        // Log.e(TAG, "**************************************************LDF Bundle Arguments: " + getActivity().getIntent().getSerializableExtra("LIVEDABBA"));
+        LDFDabba = (Dabba) getActivity().getIntent().getSerializableExtra("LIVEDABBA");
 
         ldf_ALplayers = LDFDabba.getPlayers();
-        LDFLiveCount = ldf_ALplayers.size();            // Get the count of players which will be used throughout this class
-        Log.d(TAG, "globalLiveCount: " + LDFLiveCount);
+        // Get the count of players which will be used throughout this class
+        LDFLiveCount = ldf_ALplayers.size();
+        // Log.d(TAG, "globalLiveCount: " + LDFLiveCount);
 
         // Get the date and time of the game
-        date = DateFormat.getDateTimeInstance().format(LDFDabba.getmDate());
+        date = LDFDabba.getmDate();
 
         // Get the max score for the game, this remains constant throughout the game
         maxscore = LDFDabba.getMaxScore();
@@ -95,7 +93,11 @@ public class LiveDabbaFragment extends Fragment {
         gamebet = 0;
         for (int i = 0; i < LDFLiveCount; i++)
             gamebet = gamebet + ldf_ALplayers.get(i).getBetAmount();
-        Log.w(TAG, "gamebet Amount is: " + gamebet);
+        // Log.w(TAG, "gamebet Amount is: " + gamebet);
+
+        // Initialize the round count
+        roundcount = LDFDabba.getRoundNo();
+        //Log.w(TAG, "Round No.: " + LDFDabba.getRoundNo());
 
         // Initialize Re-entry buttons for each player
         LDFreentryButtons = new Button[LDFLiveCount];
@@ -105,9 +107,6 @@ public class LiveDabbaFragment extends Fragment {
 
         // Initialize the highscore variable. This is used to find the highscore for re-entry from existing players
         highscore = 0;
-
-        // Initialize the round count
-        roundcount = LDFDabba.getRoundNo();
 
         // TODO: Work on choosing the next dealer
         // dealerno = fromNDFBundle.getInt("dealerno");
@@ -119,65 +118,6 @@ public class LiveDabbaFragment extends Fragment {
 
         // initiate the animation for the kavti view
         shakeAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.shake);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.live_dabba_fragment, parent, false);
-        //Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
-
-        // toolBar is a simpler way to create an ActionBar in androidx. Earlier, there was ActionBar which was painful
-        toolbar = (Toolbar) v.findViewById(R.id.ldftoolbar);
-
-        // Initializing all the views for a Live game
-        date_TextView = v.findViewById(R.id.game_dateText);
-        score_TextView = v.findViewById(R.id.max_scoreText);     // Shows the max score set for the game
-        betamt_TextView = v.findViewById(R.id.bet_Text);        // Shows the bet amount for the game
-        //changeMaxScoreButton = v.findViewById(R.id.changeMaxScoreButton);
-        roundno_TextView = v.findViewById(R.id.roundno_Text);     // Shows the round no. for each round
-        playersLiveView = (TableLayout) v.findViewById(R.id.liveScoreTables);
-        exitGame = (ExtendedFloatingActionButton) v.findViewById(R.id.exit_FABButton);
-        nextRound = (ExtendedFloatingActionButton) v.findViewById(R.id.next_RoundFABButton);
-
-        // Set the date, maxScore, total bet_Amount and round_count for the game. Only the total bet_Amount will vary in case of re-Entry
-        date_TextView.setText(date);
-        score_TextView.setText(String.valueOf(maxscore));
-        betamt_TextView.setText(String.valueOf(gamebet));
-        roundno_TextView.setText(String.valueOf(roundcount));
-
-        // Set up the ScoreTable using the various parameters from the fromNDFBundle
-        tempPlayersLayout();
-
-        // In case, the game has to be exited in between
-        exitGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {       // Dialog box to start a new game or close the app
-                restartDialog = new AlertDialog.Builder(getActivity()).create();
-                restartDialog.setTitle("Exit Game");
-                restartDialog.setMessage("Do you want to restart a new game?");
-                restartDialog = exitAlertMethod(restartDialog);  // DialogBox button options and actions are set in a separate class
-                restartDialog.show();
-            }
-        });
-
-        // Button to update the scores for each round. All the variables are put in the fromNDFBundle and passed to UpdateScoreFragment. Only some of them are used/updated in the USFragment
-        nextRound.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fromNDFBundle = new Bundle();
-                fromNDFBundle.putParcelable("GAME_DABBA", LDFDabba);
-                // Create the new fragment and pass the bundle using .setArguments()
-                Fragment updateScoreFragment = new UpdateScoreFragment();
-                updateScoreFragment.setArguments(fromNDFBundle);
-                getActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragmentContainer, updateScoreFragment)
-                        .commit();
-            }
-        });
-
-        return v;
     }
 
     // Inflating the Options menu in the toolbar and setting up a listener on the various options
@@ -249,7 +189,6 @@ public class LiveDabbaFragment extends Fragment {
 
             // The first row will contain only the headers: Player & Live Scores
             if (i == 0) {
-                //Log.w(TAG, "Entered if statement to create first row");
                 liveNameView.setText("Player");
                 liveScoreView.setText("Live Scores");
                 liveNameView.setTypeface(null, Typeface.BOLD);
@@ -264,7 +203,6 @@ public class LiveDabbaFragment extends Fragment {
                 int score = ldf_ALplayers.get((i - 1)).getLiveScore();
                 int reentry = ldf_ALplayers.get((i - 1)).getReEntry();
 
-                //Log.w(TAG, "Entered else statement to create further rows");
                 liveNameView.setText(ldf_ALplayers.get(i - 1).getpName());
                 liveScoreView.setText(String.valueOf(score));
                 if (score < maxscore && score >= (maxscore - 20)) {
@@ -357,6 +295,62 @@ public class LiveDabbaFragment extends Fragment {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.live_dabba_fragment, parent, false);
+        //Log.e(TAG, "LDF Dabba Bundle: " + LDFDabba);
+
+        // toolBar is a simpler way to create an ActionBar in androidx. Earlier, there was ActionBar which was painful
+        toolbar = (Toolbar) v.findViewById(R.id.ldftoolbar);
+
+        // Initializing all the views for a Live game
+        date_TextView = v.findViewById(R.id.game_dateText);
+        score_TextView = v.findViewById(R.id.max_scoreText);     // Shows the max score set for the game
+        betamt_TextView = v.findViewById(R.id.bet_Text);        // Shows the bet amount for the game
+        //changeMaxScoreButton = v.findViewById(R.id.changeMaxScoreButton);
+        roundno_TextView = v.findViewById(R.id.roundno_Text);     // Shows the round no. for each round
+        playersLiveView = (TableLayout) v.findViewById(R.id.liveScoreTables);
+        exitGame = (ExtendedFloatingActionButton) v.findViewById(R.id.exit_FABButton);
+        nextRound = (ExtendedFloatingActionButton) v.findViewById(R.id.next_RoundFABButton);
+
+        // Set the date, maxScore, total bet_Amount and round_count for the game. Only the total bet_Amount will vary in case of re-Entry
+        date_TextView.setText(date);
+        score_TextView.setText(String.valueOf(maxscore));
+        betamt_TextView.setText(String.valueOf(gamebet));
+        roundno_TextView.setText(String.valueOf(roundcount));
+
+        // In case, the game has to be exited in between
+        exitGame.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {       // Dialog box to start a new game or close the app
+                restartDialog = new AlertDialog.Builder(getActivity()).create();
+                restartDialog.setTitle("Exit Game");
+                restartDialog.setMessage("Do you want to restart a new game?");
+                restartDialog = exitAlertMethod(restartDialog);  // DialogBox button options and actions are set in a separate class
+                restartDialog.show();
+            }
+        });
+
+        // Button to update the scores for each round. All the variables are put in the fromNDFBundle and passed to UpdateScoreFragment. Only some of them are used/updated in the USFragment
+        nextRound.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create the new fragment and pass the bundle using .setArguments()
+                Fragment updateScoreFragment = new UpdateScoreFragment(LDFDabba);
+                getActivity().getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentContainer, updateScoreFragment)
+                        .commit();
+            }
+        });
+
+        // Set up the ScoreTable using the various parameters from the fromNDFBundle
+        tempPlayersLayout();
+
+        return v;
+    }
+
     // Code to be added to create a list of games screen at launch
     // DialogBox to either quit or start a new game - Updated
     private AlertDialog exitAlertMethod(AlertDialog dialog) {
@@ -364,6 +358,7 @@ public class LiveDabbaFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Fragment restartGame = new NewDabbaFragment();
+                getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getActivity().getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.fragmentContainer, restartGame)
@@ -374,7 +369,7 @@ public class LiveDabbaFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 ldf_ALplayers.removeAll(ldf_ALplayers);     // Need to check
-                System.exit(0);
+                getActivity().finish();
             }
         });
         dialog.setButton(Dialog.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
@@ -391,8 +386,8 @@ public class LiveDabbaFragment extends Fragment {
         String name = ldf_ALplayers.get(ientry).getpName();
         int betamnt = ldf_ALplayers.get(ientry).getBetAmount();
         int rescore = findHighScore();
-        Log.i(TAG, "pressed Button ID is: " + ientry);
-        Log.d(TAG, "Changing entries for player: " + name);
+        //Log.i(TAG, "pressed Button ID is: " + ientry);
+        //Log.d(TAG, "Changing entries for player: " + name);
         Log.d(TAG, "Current Entry: Player[" + ientry + "]: " +
                 "score: " + ldf_ALplayers.get(ientry).getLiveScore()
                 + ", name: " + name +
@@ -401,7 +396,7 @@ public class LiveDabbaFragment extends Fragment {
         // Re-Entry logic: Bet Amount is doubled, High score is the highest live score available, player Name is attached RE
         // Find the highScore amongst the live players
 
-        name = name + "->RE";              // tag the player with re-entry
+        name = name + " -> RE";              // tag the player with re-entry
         betamnt = 2 * betamnt;            // increase the player's bet amount by 2x
 
         Log.d(TAG, "Updated for player[" + ientry + "]: " +
@@ -418,15 +413,6 @@ public class LiveDabbaFragment extends Fragment {
 
         Toast.makeText(getActivity(), "Re-entry given to " + name + ", bet amount: " + betamnt, Toast.LENGTH_LONG).show();
     }
-
-    // Below is a common listener for all the re-entry buttons for individual players - Updated
-    View.OnClickListener reentryButtonListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            // Log.d(TAG, "Attempting to change entries for player: " + globalPlayerNames[(i - 1)]);
-            Log.d(TAG, "getting ID of player to be changed: " + v.getId());
-            onReEntryFunction(v.getId());       // Get the player's ID and pass it to the onReEntryFunction to activate re-entry option
-        }
-    };
 
     private void losersList(String loser, int loserScore) {
         losers = losers + " " + loser + ": " + loserScore + "\n";
@@ -499,7 +485,6 @@ public class LiveDabbaFragment extends Fragment {
 
             //Log.w(TAG, "Added a new player: " + player.getpName() + ", and score: " + score);
             Toast.makeText(getActivity(), "New Player added: " + player_temp + ", \n Score: " + score + ", Bet Amt.: " + singlebetamount, Toast.LENGTH_LONG).show();
-            //Log.e(TAG, "Adapter updated with: " + player.getpName());
         }
     }
 
@@ -507,7 +492,7 @@ public class LiveDabbaFragment extends Fragment {
         for (int i = 0; i < LDFLiveCount; i++) {
             if ((highscore < ldf_ALplayers.get(i).getLiveScore()) && (ldf_ALplayers.get(i).getLiveScore() < maxscore))
                 highscore = ldf_ALplayers.get(i).getLiveScore();
-            Log.d(TAG, "Highest score found is: " + highscore);
+            Log.i(TAG, "Highest score found is: " + highscore);
         }
         return highscore;
     }

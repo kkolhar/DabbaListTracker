@@ -1,9 +1,6 @@
 package com.kolhar.dabbalisttracker;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -11,12 +8,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 public class NewDabbaActivity extends SingleFragmentActivity {
-    private AlertDialog dialog;
-    private static final String TAG = "ActivityDabbaTAG";
-    private Fragment startingFragment;
-    private Dabba retrievedDabba;
-    private Context context;
-    private String filename = "dabbas.json";
+    private static final String TAG = "NewDabbaActivityTAG";
 
     @Override
     protected Fragment createFragment() {
@@ -43,36 +35,8 @@ public class NewDabbaActivity extends SingleFragmentActivity {
     // Change the Back press action to include a pop-up to confirm if you want to exit the game
     @Override
     public void onBackPressed() {
-        dialog = new AlertDialog.Builder(this).create();
-
-        dialog.setTitle("Exit Game");
-        dialog.setMessage("\n Do you want to exit the game ?");
-
-        dialog.setButton(Dialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                System.exit(0);
-            }
-        });
-        dialog.setButton(Dialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        dialog.show();
+        Intent i = new Intent(this, FirstScreenActivity.class);
+        startActivity(i);
+        finish();
     }
-
-    /*@Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            Log.i(TAG, "Loading savedInstanceState");
-            retrievedDabba = (Dabba) savedInstanceState.get("RETAINED_DABBA");
-            startingFragment = new LiveDabbaFragment(retrievedDabba);
-        } else {
-            Log.i(TAG, "Loading new Instance State of LiveDabba");
-            startingFragment = new NewDabbaFragment();
-        }
-    }*/
 }
