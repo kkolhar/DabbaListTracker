@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="choosehint">(Swipe left/right to remove a player. Long-press a player to re-arrange the list)</string>
+</resources>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/gotoolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/toolbarbkgnd"
+            android:minHeight="?attr/actionBarSize">
+
+            <TextView
+                android:id="@+id/gotoolbar_title"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Game Over"
+                android:textColor="@color/toolbartext" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <LinearLayout
+            android:id="@+id/winner_NameStrip"
+            style="@style/mainRelLayout"
+            android:layout_below="@id/gotoolbar"
+            android:layout_margin="@dimen/label_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/winner_label"
+                style="@style/innerRelLayout"
+                android:text="@string/winner_labelString"
+                android:textSize="@dimen/buttonTextSize" />
+
+            <TextView
+                android:id="@+id/winner_NameText"
+                style="@style/innerRelLayout"
+                android:layout_toRightOf="@id/date_label"
+                android:text="@string/winner_NameString"
+                android:textSize="@dimen/buttonTextSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/winner_AmtStrip"
+            style="@style/mainRelLayout"
+            android:layout_below="@id/winner_NameStrip"
+            android:layout_margin="@dimen/label_margin"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/winner_Amtlabel"
+                style="@style/innerRelLayout"
+                android:text="@string/winner_AmtLabel"
+                android:textSize="@dimen/buttonTextSize" />
+
+            <TextView
+                android:id="@+id/winner_AmtText"
+                style="@style/innerRelLayout"
+                android:layout_toRightOf="@id/date_label"
+                android:text="@string/winner_AmtString"
+                android:textSize="@dimen/buttonTextSize" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/finalLabel_strip"
+            style="@style/mainRelLayout"
+            android:layout_below="@id/winner_AmtStrip"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@drawable/trophy1" />
+
+            <TextView
+                android:id="@+id/finalScores_label"
+                style="@style/innerRelLayout"
+                android:layout_width="wrap_content"
+                android:gravity="center_horizontal"
+                android:padding="4dp"
+                android:text="@string/final_ScoresString"
+                android:textAlignment="center"
+                android:textSize="@dimen/labelSize"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/trophy1" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/finalNestedScrollView"
+            style="@style/mainRelLayout"
+            android:layout_below="@id/finalLabel_strip">
+
+            <TableLayout
+                android:id="@+id/finalScoreTables"
+                style="@style/mainRelLayout"
+                android:layout_below="@id/finalLabel_strip"
+                android:showDividers="beginning" />
+
+        </androidx.core.widget.NestedScrollView>
+
+    </RelativeLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/retry_RoundFABButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        android:backgroundTint="@color/colorButton"
+        android:visibility="invisible"
+        android:enabled="false"
+        android:gravity="center"
+        android:overScrollMode="always"
+        android:text="@string/retry_Button"
+        android:theme="@style/Theme.MaterialComponents.NoActionBar"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/gameover_FABButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:backgroundTint="@color/colorButton"
+        android:gravity="center"
+        android:overScrollMode="always"
+        android:text="@string/done_text"
+        android:theme="@style/Theme.MaterialComponents.NoActionBar"
+        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

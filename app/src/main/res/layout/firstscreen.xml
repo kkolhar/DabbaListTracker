@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/ngametoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/toolbarbkgnd"
+        android:gravity="center_horizontal"
+        android:minHeight="?attr/actionBarSize">
+
+        <TextView
+            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Dabba Tracker"
+            android:textColor="@color/toolbartext" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <Button
+        android:id="@+id/newGameButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/colorButton"
+        android:padding="32dp"
+        android:text="@string/start_new_game"
+        android:textColor="@color/black"
+        android:textSize="@dimen/buttonTextSize" />
+
+    <Button
+        android:id="@+id/previousGameButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/colorButton"
+        android:padding="32dp"
+        android:text="@string/previous_game"
+        android:textColor="@color/black"
+        android:textSize="@dimen/buttonTextSize" />
+</LinearLayout>
